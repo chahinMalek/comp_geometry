@@ -57,11 +57,7 @@ class Vector:
         return round(alpha, 10)
 
     def slope(self):
-
-        if self.tail.x != self.head.x:
-            return (self.tail.y - self.head.y) / (self.tail.x - self.head.x)
-
-        return inf
+        return (self.tail - self.head).slope()
 
     def do_intersect(self, s_2: 'Vector') -> bool:
 

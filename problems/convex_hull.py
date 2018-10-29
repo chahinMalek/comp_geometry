@@ -2,7 +2,7 @@ from geometry_objects.point import Point
 from geometry_objects.vector import Vector
 
 
-def find_centroid(vertices: list) -> list:
+def find_centroid(vertices: list) -> Point:
 
     centroid: 'Point' = Point()
 
@@ -164,12 +164,13 @@ def convex_hull_graham_scan(vertices: list) -> list:
     # divide in two subsets
     # orientate the two subsets clockwise
 
-    left_point = min(vertices, key=lambda p: p[0])
-    sorted_vertices = divide_and_sort_vertices(left_point, vertices)
-    return find_hull(sorted_vertices)
+    centroid = find_centroid(vertices)
+    sorted(vertices, key=lambda x: Vector(centroid, Point(*x)).slope())
+    return find_hull(vertices)
 
 
 # points = [(2, 1), (1, 2), (1, 4), (4, -2), (1, 1)]
-points = [(1, 1), (1, 2), (1, 3), (2, 2), (3, 3), (4, 4)]
-print(convex_hull_1(points))
+# points = [(1, 1), (1, 2), (1, 3), (2, 2), (3, 3), (4, 4)]
+points = [(0, 0), (1, 1), (2, 2), (3, 3), (3, 2), (3, 1), (3, 0), (3, -1), (3, -2), (3, -3)]
+# print(convex_hull_1(points))
 print(convex_hull_graham_scan(points))

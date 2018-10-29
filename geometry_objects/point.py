@@ -173,6 +173,12 @@ class Point:
     def distance(p1: tuple, p2: tuple) -> float:
         return sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
+    def slope(self):
+
+        theta: float = atan2(self.y, self.x)
+        theta *= (360 / 2 / pi)
+        return theta if self.y >= 0.0 else 360 + theta
+
 
 class Vertex(BaseNode, Point):
 
