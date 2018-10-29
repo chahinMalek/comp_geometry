@@ -146,9 +146,6 @@ def find_hull(vertices: list) -> list:
 
         hull.append(v)
 
-    if len(hull) > 2 and Point.orientation(Point(*hull[-2]), Point(*hull[-1]), Point(*hull[0])) > 0:
-        hull.pop()
-
     return hull
 
 
@@ -171,6 +168,6 @@ def convex_hull_graham_scan(vertices: list) -> list:
 
 # points = [(2, 1), (1, 2), (1, 4), (4, -2), (1, 1)]
 # points = [(1, 1), (1, 2), (1, 3), (2, 2), (3, 3), (4, 4)]
-points = [(0, 0), (1, 1), (2, 2), (3, 3), (3, 2), (3, 1), (3, 0), (3, -1), (3, -2), (3, -3)]
-# print(convex_hull_1(points))
+points = [(0, 0), (1, -1), (1, 1), (2, 2), (3, 3), (3, 2), (3, 1), (3, 0), (3, -1), (3, -2), (3, -3)]
+print(convex_hull_1(points))
 print(convex_hull_graham_scan(points))
