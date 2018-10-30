@@ -1,7 +1,8 @@
-from geometry_objects.point import Point
 from math import acos
-from math import pi
 from math import inf
+from math import pi
+
+from geometry_objects.point import Point
 
 
 class Vector:
@@ -53,7 +54,18 @@ class Vector:
 
     def angle_between(self, other: 'Vector') -> float:
 
-        alpha = (180 / pi) * acos(self.dot(other) / self.magnitude() / other.magnitude())
+        dot = self.dot(other)
+        self_magnitude = self.magnitude()
+        other_magnitude = other.magnitude()
+
+        if self_magnitude == 0.0 or other_magnitude == 0.0:
+
+            if dot < 0:
+                return -inf
+            else:
+                return inf
+
+        alpha = (180 / pi) * acos(dot / self_magnitude / other_magnitude)
         return round(alpha, 10)
 
     def slope(self):

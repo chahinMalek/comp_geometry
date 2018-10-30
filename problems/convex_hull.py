@@ -1,5 +1,6 @@
+from simple_poly import simple_poly
+
 from geometry_objects.point import Point
-from geometry_objects.vector import Vector
 
 
 def find_centroid(vertices: list) -> Point:
@@ -23,13 +24,20 @@ def get_edges(vertices: list) -> list:
     return edges
 
 
+#   Assumption: list of edges is sorted in the way that every edge e_i has its start point same as the
+#   e_{i-1} end point
+def get_vertices(edges: list) -> list:
+    return [e[0] for e in edges]
+
+
 def get_hull_edges(vertices: list) -> list:
 
+    size: int = len(vertices)
     edges = []
     fail_flag = -2
 
-    for i in range(len(vertices) - 1):
-        for j in range(i+1, len(vertices)):
+    for i in range(size - 1):
+        for j in range(i+1, size):
 
             current_orientation = None
 
@@ -51,7 +59,7 @@ def get_hull_edges(vertices: list) -> list:
                     current_orientation = fail_flag
                     break
 
-            if current_orientation == fail_flag:
+            if current_orientation is None or current_orientation == fail_flag:
                 continue
 
             if current_orientation == -1:
@@ -115,33 +123,59 @@ def find_neighbour_edge(last_edge, edges: list):
     return None
 
 
-def divide_and_sort_vertices(leftmost_point, vertices: list) -> list:
+def convex_hull_quad(points: list) -> list:
 
-    upper_vertices = []
-    lower_vertices = []
+    hull = []
 
-    vertices = sorted(vertices, key=lambda x: x[0])
-    centroid: 'Point' = find_centroid(vertices)
+    for l in points:
 
-    for v in vertices:
+        p_l = Point(l[0], l[1])
+        is_in_hull = True
 
-        if Point.orientation(Point(*leftmost_point), centroid, Point(*v)) >= 0:
-            upper_vertices.append(v)
+        for i in range(len(points)-2):
+            p_i = Point(points[i][0], points[i][1])
 
-        else:
-            lower_vertices.insert(0, v)
+            for j in range(i+1, len(points)-1):
+                p_j = Point(points[j][0], points[j][1])
 
-    return upper_vertices + lower_vertices
+                for k in range(j+1, len(points)):
+                    p_k = Point(points[k][0], points[k][1])
+
+                    if p_i == p_l or p_j == p_l or p_k == p_l:
+                        continue
+
+                    if p_l.in_triangle(p_i, p_j, p_k):
+                        is_in_hull = False
+                        break
+
+                if not is_in_hull:
+                    break
+
+            if not is_in_hull:
+                break
+
+        if is_in_hull:
+            hull.append(l)
+
+    return simple_poly(hull)
 
 
-def find_hull(vertices: list) -> list:
+def convex_hull_cubic(points: list) -> list:
 
+    hull = get_hull_edges(points)
+    sort_hull(hull)
+    return simple_poly(get_vertices(hull))
+
+
+def convex_hull_graham_scan(vertices: list) -> list:
+
+    vertices = simple_poly(vertices)
     hull = vertices[:2]
 
     for v in vertices[2:]:
 
         # edge case if only one point is in hull
-        while len(hull) > 1 and Point.orientation(Point(*hull[-2]), Point(*hull[-1]), Point(*v)) > 0:
+        while len(hull) > 1 and Point.orientation(Point(*hull[-2]), Point(*hull[-1]), Point(*v)) < 0:
             hull.pop()
 
         hull.append(v)
@@ -149,25 +183,13 @@ def find_hull(vertices: list) -> list:
     return hull
 
 
-def convex_hull_1(points: list) -> list:
+if __name__ == '__main__':
 
-    hull = get_hull_edges(points)
-    sort_hull(hull)
-    return hull
+    # points = [(2, 1), (1, 2), (1, 4), (4, -2), (1, 1)]
+    # points = [(1, 1), (1, 2), (1, 3), (2, 2), (3, 3), (4, 4)]
+    points = [(0, 0), (0, 1), (1, -1), (1, 1), (2, 2), (3, 3), (3, 2), (3, 1), (3, 0), (3, -1), (3, -2), (3, -3)]
+    # print(convex_hull_quad(points))
+    print(convex_hull_cubic(points))
+    print(convex_hull_graham_scan(points))
 
-
-def convex_hull_graham_scan(vertices: list) -> list:
-
-    # divide in two subsets
-    # orientate the two subsets clockwise
-
-    centroid = find_centroid(vertices)
-    sorted(vertices, key=lambda x: Vector(centroid, Point(*x)).slope())
-    return find_hull(vertices)
-
-
-# points = [(2, 1), (1, 2), (1, 4), (4, -2), (1, 1)]
-# points = [(1, 1), (1, 2), (1, 3), (2, 2), (3, 3), (4, 4)]
-points = [(0, 0), (1, -1), (1, 1), (2, 2), (3, 3), (3, 2), (3, 1), (3, 0), (3, -1), (3, -2), (3, -3)]
-print(convex_hull_1(points))
-print(convex_hull_graham_scan(points))
+    # print(1 and -1)

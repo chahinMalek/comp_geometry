@@ -1,6 +1,6 @@
-from math import sqrt
-from math import pi
 from math import atan2
+from math import pi
+from math import sqrt
 from sys import maxsize
 
 
@@ -146,9 +146,16 @@ class Point:
     def self_orientation(self, p1: 'Point', p2: 'Point') -> int:
         return Point.orientation(p1, p2, self)
 
-    # def distance_from(self, vector: 'Vector') -> float:
-    #
+    def in_triangle(self, p1, p2, p3) -> bool:
 
+        o1 = self.self_orientation(p1, p2)
+        o2 = self.self_orientation(p2, p3)
+        o3 = self.self_orientation(p3, p1)
+
+        if o1 == 0 or o2 == 0 or o3 == 0:
+            return False
+
+        return o1 == o2 == o3
 
     @staticmethod
     def orientation(p1: 'Point', p2: 'Point', p3: 'Point') -> int:
