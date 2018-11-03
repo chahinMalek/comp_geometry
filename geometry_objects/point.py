@@ -136,13 +136,6 @@ class Point:
         else:
             return Point.CLASSIFICATIONS['front']
 
-    def polar_angle(self) -> float:
-
-        # should return values from [-180, to 180]
-        theta: float = (180 / pi) * atan2(self.y, self.y)
-
-        return theta if self.y >= 0.0 else 360.0 + theta
-
     def self_orientation(self, p1: 'Point', p2: 'Point') -> int:
         return Point.orientation(p1, p2, self)
 
@@ -165,11 +158,11 @@ class Point:
 
         theta = a.x * b.y - a.y * b.x
 
-        # oriented clockwise (negative) <=> p3 is on the p1p2 right
+        # oriented counter clockwise (positive) <=> p3 is on the p1p2 left
         if theta > 0:
             return 1
 
-        # oriented counter clockwise (positive) <=> p3 is on the p1p2 left
+        # oriented clockwise (negative) <=> p3 is on the p1p2 right
         if theta < 0:
             return -1
 
