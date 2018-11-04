@@ -173,6 +173,9 @@ class Point:
     def distance(p1: tuple, p2: tuple) -> float:
         return sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
+    def distance(self, p: 'Point'):
+        return sqrt((self.x - p.x) ** 2 + (self.y - p.y) ** 2)
+
     def slope(self):
 
         theta: float = atan2(self.y, self.x)

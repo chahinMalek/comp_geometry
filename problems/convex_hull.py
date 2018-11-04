@@ -1,3 +1,4 @@
+from berg_problems.chapter_1 import get_point_index
 from geometry_objects.point import Point
 from geometry_objects.vector import Vector
 from problems.simple_poly import simple_poly
@@ -169,62 +170,48 @@ def convex_hull_cubic(vertices: list) -> list:
 
 def convex_hull_jarvis_march(vertices: list) -> list:
 
-    i: int = vertices.index(min(vertices, key=lambda x: (x[0], x[1])))
+    i: int = get_point_index(vertices, x=True, max_x=False, max_y=False)
     vertices[0], vertices[i] = vertices[i], vertices[0]
 
-    point: 'Point' = Point(vertices[i][0], vertices[i][1] + 1)
-    vec = Vector(Point(*vertices[0]), point)
-
-    j: int = vertices.index(
-        min(vertices, key=lambda x: vec.angle_between(Vector(Point(*vertices[0]), Point(*x))))
-    )
-
+    vec = Vector(Point(*vertices[0]), Point(vertices[0][0], vertices[0][1] + 1))
+    j = vertices.index(min(vertices, key=lambda x: vec.angle_between(Vector(Point(*vertices[0]), Point(*x)))))
     vertices[1], vertices[j] = vertices[j], vertices[1]
-    hull = vertices[:2]
 
-    i: int = 0
-    j: int = 1
-    size: int = len(vertices)
+    vertices.append(vertices[0])
+    hull_size = 2
+    vec.tail = Point(*vertices[1])
 
-    for k in range(2, size):
+    while True:
 
-        p_j = Point(*vertices[j])
-        p_i = Point(*vertices[i])
+        vec.head = vec.tail
+        vec.tail = Point(*vertices[hull_size])
+        k = hull_size
+        min_dist = vec.head.distance(vec.tail)
 
-        v1 = Vector(p_j, p_i)
-        # max_angle = -inf
-        min_angle = 180.0 - v1.angle_between(Vector(p_j, Point(*hull[0])))
-        min_dist = Point(*hull[0]).euclidean_distance(p_j)
+        for j in range(hull_size, len(vertices)):
 
-        next = k
+            p_j = Point(*vertices[j])
+            ori = Point.orientation(vec.head, vec.tail, p_j)
+            curr_dist = vec.tail.distance(p_j)
 
-        for l in range(k, size):
+            if ori > 0:
+                k = j
+                vec.tail = p_j
 
-            current_angle = 180.0 - v1.angle_between(Vector(p_j, Point(*vertices[l])))
-            current_dist = p_j.euclidean_distance(Point(*vertices[l]))
+            elif ori == 0 and curr_dist < min_dist:
+                k = j
+                vec.tail = p_j
+                min_dist = curr_dist
 
-            if current_angle < min_angle:
-                next = l
-                min_angle = current_angle
+        if vertices[k] == vertices[0]:
+            break
 
-            # elif current_angle == min_angle and current_dist < min_dist:
-            #     next = l
-            #     min_angle = current_angle
-            #     min_dist = current_dist
+        else:
+            vertices[hull_size], vertices[k] = vertices[k], vertices[hull_size]
+            hull_size += 1
 
-        print(v1, vertices[next], min_angle)
-
-        if min_angle == 180.0 - v1.angle_between(Vector(p_j, Point(*hull[0]))):
-            return hull
-
-        if next != k:
-            vertices[k], vertices[next] = vertices[next], vertices[k]
-
-        hull.append(vertices[k])
-        i += 1
-        j += 1
-
-    return hull
+    vertices.pop()
+    return vertices[:hull_size]
 
 
 def convex_hull_graham_scan(vertices: list) -> list:
@@ -243,52 +230,6 @@ def convex_hull_graham_scan(vertices: list) -> list:
     return hull
 
 
-"""
-    02.11.2018
-"""
-
-
-def divide_vertices(vertices: list, left_point: tuple) -> tuple:
-
-    upper = []
-    lower = []
-
-    for v in vertices:
-
-        if v[1] > left_point[1]:
-            upper.append(v)
-        else:
-            lower.insert(0, v)
-
-    return upper, lower
-
-
-def graham_scan(vertices: list) -> list:
-
-    vertices.sort()
-    left_p = min(vertices)
-    upper_vertices, lower_vertices = divide_vertices(vertices, left_p)
-
-    upper_hull = find_hull(upper_vertices)
-    lower_hull = find_hull(lower_vertices)
-
-    return upper_hull + lower_hull
-
-
-def find_hull(vertices: list) -> list:
-
-    hull = vertices[:2]
-
-    for v in vertices[2:]:
-
-        while Point.orientation(Point(*hull[-2]), Point(*hull[-1]), Point(*v)) > 0:
-            hull.pop()
-
-        hull.append(v)
-
-    return hull
-
-
 if __name__ == '__main__':
 
     # points = [(2, 1), (1, 2), (1, 4), (4, -2), (1, 1)]
@@ -296,6 +237,6 @@ if __name__ == '__main__':
     points = [(0, 0), (0, 1), (1, 1), (2, 2), (1, -1), (3, 3), (3, 2), (3, 1), (3, 0), (3, -1), (3, -2), (3, -3)]
     # print(convex_hull_quad(points))
     # print(convex_hull_cubic(points))
-    # print(convex_hull_jarvis_march(points))
+    print(convex_hull_jarvis_march(points))
     print(convex_hull_graham_scan(points))
-    print(graham_scan(points))
+    # print(graham_scan(points))

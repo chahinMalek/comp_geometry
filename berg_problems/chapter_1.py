@@ -211,6 +211,8 @@ def hull_from_vertices(vertices: list) -> list:
 
 
 def find_convex_union(hull1: list, hull2: list) -> list:
+
+    # TODO: maybe find the closest point from one hull to the other, then search for tangents
     h1_max_x = get_point_index(hull1, x=True, max_x=True)
     h2_min_x = get_point_index(hull2, x=True, max_x=False)
 
