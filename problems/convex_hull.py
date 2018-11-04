@@ -1,7 +1,12 @@
 from berg_problems.chapter_1 import get_point_index
+from berg_problems.chapter_1 import orientation
 from geometry_objects.point import Point
 from geometry_objects.vector import Vector
 from problems.simple_poly import simple_poly
+
+"""
+    Utility functions for convex hull algorithms
+"""
 
 
 def find_centroid(vertices: list) -> Point:
@@ -124,6 +129,73 @@ def find_neighbour_edge(last_edge, edges: list):
     return None
 
 
+def orientate_vertices(p1: tuple, p2: tuple, p3: tuple) -> tuple:
+
+    points = [p1, p2, p3]
+
+    points.sort(key=lambda x: x[0])
+
+    ori = orientation(points[0], points[1], points[2])
+
+    if ori > 0:
+        return points[0], points[2], points[1]
+
+    else:
+        return tuple(points)
+
+
+def find_closest_point_index(vertices: list, p: tuple) -> int:
+
+    min_dist_index: int = 0
+    min_dist = Point.distance(Point(*vertices[0]), Point(*p))
+
+    for i in range(1, len(vertices)):
+
+        current_distance = Point.distance(Point(*vertices[i]), Point(*p))
+
+        if current_distance < min_dist:
+            min_dist_index = i
+            min_dist = current_distance
+
+    return min_dist_index
+
+
+def find_tangent_point_index(vertices: list, start: int, p: tuple, clockwise: bool = True) -> int:
+
+    i: int = start
+    size: int = len(vertices)
+
+    if clockwise:
+        while orientation(p, vertices[i], vertices[(size+i-1) % size]) < 0:
+            i = (size + i - 1) % size
+
+    else:
+        while orientation(p, vertices[i], vertices[(i+1) % size]) > 0:
+            i = (i + 1) % size
+
+    return i
+
+
+def union_point_poly(hull: list, p: tuple):
+
+    start: int = find_closest_point_index(hull, p)
+
+    left_tan_index = find_tangent_point_index(hull, start=start, p=p, clockwise=False)
+    right_tan_index = find_tangent_point_index(hull, start=start, p=p, clockwise=True)
+
+    # print('p: {}, l: {}, r: {}, h: {}'.format(p, hull[left_tan_index], hull[right_tan_index], hull))
+
+    while hull[(right_tan_index+1) % len(hull)] != hull[left_tan_index]:
+        hull.pop((right_tan_index+1) % len(hull))
+
+    hull.insert((right_tan_index+1) % len(hull), p)
+
+
+"""
+    Convex hull algorithms
+"""
+
+
 def convex_hull_quad(vertices: list) -> list:
 
     hull = []
@@ -214,6 +286,20 @@ def convex_hull_jarvis_march(vertices: list) -> list:
     return vertices[:hull_size]
 
 
+def convex_hull_incremental(vertices: list) -> list:
+
+    hull = list(orientate_vertices(vertices[0], vertices[1], vertices[2]))
+
+    for i in range(3, len(vertices)):
+
+        p_i = Point(*vertices[i])
+
+        if not p_i.in_poly(hull):
+            union_point_poly(hull, vertices[i])
+
+    return hull
+
+
 def convex_hull_graham_scan(vertices: list) -> list:
 
     vertices = simple_poly(vertices)
@@ -237,6 +323,6 @@ if __name__ == '__main__':
     points = [(0, 0), (0, 1), (1, 1), (2, 2), (1, -1), (3, 3), (3, 2), (3, 1), (3, 0), (3, -1), (3, -2), (3, -3)]
     # print(convex_hull_quad(points))
     # print(convex_hull_cubic(points))
-    print(convex_hull_jarvis_march(points))
+    # print(convex_hull_jarvis_march(points))
+    print(convex_hull_incremental(points))
     print(convex_hull_graham_scan(points))
-    # print(graham_scan(points))

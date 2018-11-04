@@ -3,6 +3,8 @@ from math import pi
 from math import sqrt
 from sys import maxsize
 
+from berg_problems.chapter_1 import orientation
+
 
 class BaseNode:
 
@@ -181,6 +183,18 @@ class Point:
         theta: float = atan2(self.y, self.x)
         theta *= (360 / 2 / pi)
         return theta if self.y >= 0.0 else 360 + theta
+
+    def in_poly(self, vertices: list) -> bool:
+
+        size: int = len(vertices)
+        point: tuple = (self.x, self.y)
+
+        for i in range(size):
+
+            if orientation(vertices[i], vertices[(i+1) % size], point) > 0:
+                return False
+
+        return True
 
 
 class Vertex(BaseNode, Point):
