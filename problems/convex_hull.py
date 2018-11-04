@@ -183,12 +183,11 @@ def union_point_poly(hull: list, p: tuple):
     left_tan_index = find_tangent_point_index(hull, start=start, p=p, clockwise=False)
     right_tan_index = find_tangent_point_index(hull, start=start, p=p, clockwise=True)
 
-    # print('p: {}, l: {}, r: {}, h: {}'.format(p, hull[left_tan_index], hull[right_tan_index], hull))
+    if left_tan_index < right_tan_index:
+        hull[:] = hull[left_tan_index:right_tan_index+1] + [p]
 
-    while hull[(right_tan_index+1) % len(hull)] != hull[left_tan_index]:
-        hull.pop((right_tan_index+1) % len(hull))
-
-    hull.insert((right_tan_index+1) % len(hull), p)
+    else:
+        hull[:] = hull[:right_tan_index+1] + [p] + hull[left_tan_index:]
 
 
 """
@@ -300,6 +299,17 @@ def convex_hull_incremental(vertices: list) -> list:
     return hull
 
 
+def convex_hull_incremental_fast(vertices: list) -> list:
+
+    vertices.sort()
+    hull = vertices[:3]
+
+    for i in range(3, len(vertices)):
+        union_point_poly(hull, vertices[i])
+
+    return hull
+
+
 def convex_hull_graham_scan(vertices: list) -> list:
 
     vertices = simple_poly(vertices)
@@ -324,5 +334,6 @@ if __name__ == '__main__':
     # print(convex_hull_quad(points))
     # print(convex_hull_cubic(points))
     # print(convex_hull_jarvis_march(points))
-    print(convex_hull_incremental(points))
+    # print(convex_hull_incremental(points))
+    print(convex_hull_incremental_fast(points))
     print(convex_hull_graham_scan(points))
